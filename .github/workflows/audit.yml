@@ -1,0 +1,22 @@
+name: Audit Secure Overrides
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v3
+      with: { node-version: 20 }
+    - name: Install
+      run: npm ci
+    - name: Audit
+      run: npm audit --omit=dev
+    - name: Check tmp version
+      run: |
+        BAD=$(npm ls tmp 2>/dev/null | grep -E 'tmp@' | grep -v 'tmp@0\.2\.4' || true)
+        if [ -n "$BAD" ]; then
+          echo "Found non-0.2.4 tmp versions:" ; echo "$BAD" ; exit 1
+        fi
+        echo "tmp pinned to 0.2.4"
