@@ -62,7 +62,7 @@
     "fs.realpath": "^1.0.0",
     "get-caller-file": "^2.0.5",
     "glob": "^8.1.0",
-    "glob-parent": "^5.1.2",
+    "glob-parent": "^6.0.2",
     "graceful-fs": "^4.2.11",
     "has-flag": "^4.0.0",
     "hash.js": "^1.1.7",
