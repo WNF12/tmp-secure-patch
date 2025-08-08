@@ -168,5 +168,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "packageManager": "npm@10.8.2"
 }
