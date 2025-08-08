@@ -43,7 +43,7 @@
     "debug": "^4.4.1",
     "decamelize": "^4.0.0",
     "depd": "^2.0.0",
-    "diff": "^5.2.0",
+    "diff": "^8.0.2",
     "elliptic": "^6.6.1",
     "emoji-regex": "^8.0.0",
     "enquirer": "^2.4.1",
