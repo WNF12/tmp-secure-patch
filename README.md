@@ -18,3 +18,5 @@ This project uses the `overrides` field in `package.json`:
   "tmp": "0.2.4"
 }
 # Final push to trigger CI
+
+![CI](https://github.com/WNF12/tmp-secure-patch/actions/workflows/audit.yml/badge.svg)
