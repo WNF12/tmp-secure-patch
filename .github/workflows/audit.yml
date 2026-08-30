@@ -1,23 +1,66 @@
 name: Audit Secure Overrides
+
 on:
-  push: { branches: [main] }
-  pull_request: { branches: [main] }
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v3
-      with: { node-version: 20 }
-    - name: Install
-      run: npm ci
-    - name: Audit
-      run: npm audit --omit=dev
-    - name: Check tmp version
-      run: |
-        BAD=$(npm ls tmp 2>/dev/null | grep -E 'tmp@' | grep -v 'tmp@0\.2\.4' || true)
-        if [ -n "$BAD" ]; then
-          echo "Found non-0.2.4 tmp versions:" ; echo "$BAD" ; exit 1
-        fi
-        echo "tmp pinned to 0.2.4"
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Audit dev dependencies (advisory)
+        continue-on-error: true
+        run: npm audit
+
+      - name: Verify tmp is pinned
+        env:
+          # Single source of truth - keep in step with overrides.tmp in package.json.
+          EXPECTED_TMP: "0.2.7"
+        run: |
+          set -euo pipefail
+
+          # npm ls exits non-zero on unrelated peer/extraneous warnings, so we
+          # keep the JSON and judge the tree ourselves instead of the exit code.
+          npm ls tmp --all --json > tmp-tree.json || true
+
+          versions=$(jq -r '
+            [.. | objects | to_entries[]? | select(.key == "tmp") | .value.version // empty]
+            | unique | .[]
+          ' tmp-tree.json)
+
+          # Absent tmp means the guard proved nothing - treat that as failure.
+          if [ -z "$versions" ]; then
+            echo "::error::tmp not found in the installed tree; the pin cannot be verified."
+            exit 1
+          fi
+
+          echo "Resolved tmp versions:"
+          echo "$versions" | sed 's/^/  /'
+
+          if [ "$versions" != "$EXPECTED_TMP" ]; then
+            echo "::error::Expected exactly tmp@${EXPECTED_TMP}; see resolved versions above."
+            exit 1
+          fi
+
+          echo "tmp is pinned to ${EXPECTED_TMP}."
+          echo "Mitigates GHSA-52f5-9888-hmc6 (<=0.2.3) and GHSA-ph9p-34f9-6g65 (<0.2.6)."

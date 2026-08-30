@@ -160,7 +160,7 @@
     "yocto-queue": "^0.1.0"
   },
   "overrides": {
-    "tmp": "0.2.4"
+    "tmp": "0.2.7"
   },
   "scripts": {
     "test": "mocha"
