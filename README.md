@@ -47,10 +47,22 @@ replaces those with `0.2.7` and deduplicates them to one installed copy.
 The [audit workflow](.github/workflows/audit.yml) runs on every push and pull request
 against `main`:
 
-1. `npm audit --omit=dev` — fails the build on production advisories.
-2. `npm audit` — dev-scope advisories, reported but non-blocking.
-3. A pin check that parses `npm ls tmp --all --json` and requires every resolved copy
+1. A pin check that parses `npm ls tmp --all --json` and requires every resolved copy
    of `tmp` to match the expected version.
+2. `npm audit` over the whole tree — fails the build on any advisory.
 
 The pin check **fails closed**: if `tmp` is absent from the tree, or `npm ls` errors,
-the step fails rather than reporting success it cannot substantiate.
+the step fails rather than reporting success it cannot substantiate. It runs *before*
+the audit so that an unrelated advisory cannot mask the one guarantee this project
+exists to make.
+
+## 📁 On the dependency list
+
+`dependencies` is intentionally empty. This repository contains no application code —
+it exists to demonstrate and enforce the `tmp` override — so it requires nothing
+directly. The two tools it does use, `hardhat` and `patch-package`, are declared as
+`devDependencies` and bring their own transitive trees.
+
+`tmp` reaches the tree through `patch-package`, which is exactly the situation
+`overrides` is designed for: a transitive dependency you do not control, forced to a
+version you choose.
