@@ -25,13 +25,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit production dependencies
-        run: npm audit --omit=dev
-
-      - name: Audit dev dependencies (advisory)
-        continue-on-error: true
-        run: npm audit
-
       - name: Verify tmp is pinned
         env:
           # Single source of truth - keep in step with overrides.tmp in package.json.
@@ -64,3 +57,10 @@ jobs:
 
           echo "tmp is pinned to ${EXPECTED_TMP}."
           echo "Mitigates GHSA-52f5-9888-hmc6 (<=0.2.3) and GHSA-ph9p-34f9-6g65 (<0.2.6)."
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Audit dev dependencies (advisory)
+        continue-on-error: true
+        run: npm audit
