@@ -58,9 +58,8 @@ jobs:
           echo "tmp is pinned to ${EXPECTED_TMP}."
           echo "Mitigates GHSA-52f5-9888-hmc6 (<=0.2.3) and GHSA-ph9p-34f9-6g65 (<0.2.6)."
 
-      - name: Audit production dependencies
-        run: npm audit --omit=dev
-
-      - name: Audit dev dependencies (advisory)
-        continue-on-error: true
+      - name: Audit dependencies
+        # Everything this project installs is a devDependency (hardhat and
+        # patch-package); an --omit=dev audit would scan nothing. Audit the
+        # whole tree, and block on it.
         run: npm audit
