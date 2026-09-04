@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "hardhat": "^3",
-    "patch-package": "^8.0.0"
+    "patch-package": "^8.0.1"
   },
   "name": "wasnowforward",
   "version": "1.0.0",
